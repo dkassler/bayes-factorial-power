@@ -7,6 +7,9 @@ library(plyr)               # for data wrangling
 library(ggplot2)            # for plotting
 library(glm2)               # provides stability for models that may fail to converge using glm()
 
+setwd(here::here("PowerCalc"))
+options(error = kasslR::send_error())
+
 ###################################################
 # which designs are you interested in looking at? #
 ###################################################
@@ -189,9 +192,9 @@ sim <- function(N=5000,    # total sample size
                    bd = coef$bd[!is.na(coef$yBar)],
                    cd = coef$cd[!is.na(coef$yBar)])
   
-  # mod4var <- stan_model('powerSim4var.stan')
-  # save(mod4var, file='mod4var.RData')
-  load('mod4var.RData')
+  mod4var <- stan_model('powerSim4var.stan')
+  #save(mod4var, file='mod4var.RData')
+  #load('mod4var.RData')
   fit <- sampling(mod4var, data = stanData, iter=nIter, warmup=nWarmup, 
                   chains=nChains, refresh=F, pars='yHat')
   
@@ -258,6 +261,10 @@ output$MDE <- foreach(i = 1:nrow(output), .combine='c',
       nIter=550,
       nChains=1)
 Sys.time()-startTime
+
+# save workspace in case of future problems
+save.image(file = "powerSim_complete.Rdata")
+kasslR::send_mail(msg = sprintf("Stan code complete in %s", kasslR::this_script()))
 
 #####################################################################################
 # for each design, summarize across simulations. for designs with more than 1/3 of  # 
