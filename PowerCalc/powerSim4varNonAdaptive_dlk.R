@@ -192,9 +192,9 @@ sim <- function(N=5000,    # total sample size
                    bd = coef$bd[!is.na(coef$yBar)],
                    cd = coef$cd[!is.na(coef$yBar)])
   
-  mod4var <- stan_model('powerSim4var.stan')
+  #mod4var <- stan_model('powerSim4var.stan')
   #save(mod4var, file='mod4var.RData')
-  #load('mod4var.RData')
+  load('mod4var.RData')
   fit <- sampling(mod4var, data = stanData, iter=nIter, warmup=nWarmup, 
                   chains=nChains, refresh=F, pars='yHat')
   
@@ -244,12 +244,14 @@ sim <- function(N=5000,    # total sample size
 ##########
 # do it! #
 ##########
-# cl <- makeCluster(3, outfile = "WhatsWrong.txt")
-# registerDoParallel(cl)
-registerDoSEQ()
+cl <- makeCluster(64, outfile = "powerSim4varNonAdaptive_out.txt")
+registerDoParallel(cl)
+# registerDoSEQ()
 startTime <- Sys.time()
 output$MDE <- foreach(i = 1:nrow(output), .combine='c',
-                      .packages=c('rstan', 'glm2', 'plyr')) %dopar% 
+                     .packages=c('rstan', 'glm2', 'plyr')) %dopar%
+# i <- 4
+# s <- 
   sim(N=output$N[i],
       nA=output$nA[i],
       nB=output$nB[i],
@@ -262,9 +264,11 @@ output$MDE <- foreach(i = 1:nrow(output), .combine='c',
       nChains=1)
 Sys.time()-startTime
 
+# kasslR::gandalf()
+
 # save workspace in case of future problems
-save.image(file = "powerSim_complete.Rdata")
-kasslR::send_mail(msg = sprintf("Stan code complete in %s", kasslR::this_script()))
+save.image(file = sprintf("powerSim_complete_%s.Rdata", Sys.Date()))
+kasslR::send_mail(msg = sprintf("Stan code finished in %s", format(Sys.time()-startTime)))
 
 #####################################################################################
 # for each design, summarize across simulations. for designs with more than 1/3 of  # 
