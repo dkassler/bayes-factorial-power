@@ -8,12 +8,12 @@ library(ggplot2)            # for plotting
 library(glm2)               # provides stability for models that may fail to converge using glm()
 
 setwd(here::here("PowerCalc"))
-options(error = kasslR::send_error())
+# options(error = kasslR::send_error())
 
 ###################################################
 # which designs are you interested in looking at? #
 ###################################################
-designs <- expand.grid(N=c(1000,2000,5000),
+designs <- expand.grid(N=c(350, 1000, 3500, 5000, 10000),
                        nA=c(2,3,4,5),
                        cauchyScale=c(5),
                        diff=c(.25))
@@ -37,7 +37,7 @@ designs$nD[designs$nA==5] <- 2
 ############################################################################
 # how many times do you want to simulated an experiment under each design? #
 ############################################################################
-nSims <- 25
+nSims <- 10
 
 #########################################################
 # create an object that will hold, for each simulation, # 
@@ -244,9 +244,9 @@ sim <- function(N=5000,    # total sample size
 ##########
 # do it! #
 ##########
-cl <- makeCluster(64, outfile = "powerSim4varNonAdaptive_out.txt")
-registerDoParallel(cl)
-# registerDoSEQ()
+#cl <- makeCluster(64, outfile = "powerSim4varNonAdaptive_out.txt")
+#registerDoParallel(cl)
+registerDoSEQ()
 startTime <- Sys.time()
 output$MDE <- foreach(i = 1:nrow(output), .combine='c',
                      .packages=c('rstan', 'glm2', 'plyr')) %dopar%
@@ -259,8 +259,8 @@ output$MDE <- foreach(i = 1:nrow(output), .combine='c',
       nD=output$nD[i],
       cauchyScale=output$cauchyScale[i],
       diff=.25,
-      nWarmup=50,
-      nIter=550,
+      nWarmup=100,
+      nIter=200,
       nChains=1)
 Sys.time()-startTime
 
@@ -269,6 +269,12 @@ Sys.time()-startTime
 # save workspace in case of future problems
 save.image(file = sprintf("powerSim_complete_%s.Rdata", Sys.Date()))
 kasslR::send_mail(msg = sprintf("Stan code finished in %s", format(Sys.time()-startTime)))
+#-----
+library(tidyverse)
+library(here)
+outdir <- here("data/save/output_100")
+output <- dir(outdir) %>% 
+  map_df(~readRDS(file.path(outdir, .)))
 
 #####################################################################################
 # for each design, summarize across simulations. for designs with more than 1/3 of  # 
@@ -284,19 +290,19 @@ MDEs <- aggregate(MDE~N+nA+nB+nC+nD,
 ########
 # plot #
 ########
-# p <- ggplot(output, aes(factor(N), MDE))
-# p + geom_abline(int=.25, sl=0, col='darkgrey') +
-#   geom_boxplot(aes(fill=factor(nA, levels=c(2,4,3,5), 
-#                                labels=c('2x2x2x2 = 16 arms',
-#                                         '2x3x3x4 = 72 arms',
-#                                         '2x3x3x10 = 180 arms',
-#                                         '2x5x5x5 = 250 arms')))) +
-#   guides(fill=guide_legend(title='')) +
-#   labs(x='Sample size')
-# ggsave(file='powerSim4varNonAdaptive_distribution.pdf', width=6.5, height=5)
+p <- ggplot(output, aes(factor(N), MDE))
+p + #geom_abline(int=.25, sl=0, col='darkgrey') +
+  geom_boxplot(aes(fill=factor(nA, levels=c(2,4,3,5),
+                               labels=c('2x2x2x2 = 16 arms',
+                                        '2x3x3x4 = 72 arms',
+                                        '2x3x3x10 = 180 arms',
+                                        '2x5x5x5 = 250 arms')))) +
+  guides(fill=guide_legend(title='')) +
+  labs(x='Sample size')
+ggsave(file='powerSim4varNonAdaptive_distribution.pdf', width=6.5, height=5)
 
 p2 <- ggplot(MDEs, aes(N, MDE))
-p2 + geom_abline(int=.25, sl=0, col='darkgrey') +
+p2 + #geom_abline(int=.25, sl=0, col='darkgrey') +
   geom_line(aes(col=factor(nA, levels=c(2,4,3,5), 
                            labels=c('2x2x2x2 = 16 arms',
                                     '2x3x3x4 = 72 arms',
@@ -310,6 +316,12 @@ p2 + geom_abline(int=.25, sl=0, col='darkgrey') +
   guides(col=guide_legend(title='')) +
   labs(x='Sample size') 
 ggsave(file='powerSim4varNonAdaptive_median.pdf', width=6.5, height=5)
+
+ggplot(data = MDEs, aes(x = nA * nB * nC * nD, y = MDE, group = N, color = factor(N))) +
+  geom_point() + 
+  geom_line()+
+  labs(x = "Number of Arms", color = "Study\nSize")
+ggsave(file='powerSim4varNonAdaptive_mdenarm.pdf', width=6.5, height=5)
 
 ########
 # save #
