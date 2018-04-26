@@ -1,4 +1,4 @@
-version: 0.1
+version: 0.8
 data_loading: FALSE
 data_loading_header: TRUE
 data_ignore:
@@ -7,7 +7,7 @@ recursive_loading: FALSE
 munging: TRUE
 logging: FALSE
 logging_level: INFO
-load_libraries: FALSE
+load_libraries: TRUE
 libraries: magrittr,
   tidyverse,
   rstan,
