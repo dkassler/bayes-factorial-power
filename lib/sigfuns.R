@@ -8,7 +8,7 @@
 
 # Frequentist sig functions -----------------------------------------------
 
-sig.freq_arms <- function(coef, fit) {
+sig_freq_arms <- function(coef, fit) {
   # function to get indicators for each arm
   get_arm_ind <- function(a, b, c, d) {
     nm1 <- paste0(c('a', 'b', 'c', 'd'), c(a, b, c, d))
@@ -45,7 +45,7 @@ sig.freq_arms <- function(coef, fit) {
   return(pairwise)
 }
 
-sig.freq_main <- function(coef, fit) {
+sig_freq_main <- function(coef, fit) {
   get_ind <- function(a, x) {
     nm <- paste0(a, x)
     ind <- names(coef(fit)) %in% nm
@@ -132,7 +132,7 @@ freq_sig_nofactor <- function(data, coef){
 # Bayesian sig functions --------------------------------------------------
 
 
-sig.bayes_arms <- function(coef, fit) {
+sig_bayes_arms <- function(coef, fit) {
   sims <- extract(fit, pars = 'yHat')    
   
   PPs <- data.frame(mu1=rep(NA,choose(length(coef$mu), 2)), 
@@ -155,7 +155,7 @@ sig.bayes_arms <- function(coef, fit) {
   return(PPs)
 }
 
-sig.bayes_main <- function(coef, fit) {
+sig_bayes_main <- function(coef, fit) {
   levs <- coef[1:10]
   sims <- extract(fit, toupper(names(levs)))
   
