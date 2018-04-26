@@ -10,11 +10,6 @@ study_designs <- list(
   design_frame(5, 5, 5, 2)
 )
 
-# sigfuns <- list(
-#   bayes_arms = partial(sigfun.bayes_arms, .lazy = FALSE, model = model, 
-#                        control = list(adapt_delta = 0.99, max_treedepth = 20),
-#                        chains = 1)
-# )
 sigfuns <- list(
   'bayes_arms' = sig.bayes_arms,
   'bayes_main' = sig.bayes_main
@@ -23,7 +18,6 @@ sigfuns <- list(
 scenarios <- cross_df(list(
   study_design = study_designs,
   N = c(350, 1000, 3500, 5000, 10000),
-  # N = c(350, 10000),
   sigfun = names(sigfuns)
 )) %>% 
   unnest(study_design) 
@@ -34,33 +28,12 @@ sims <- scenarios %>%
   replicate(n = 1000, expr = ., simplify = F) %>% 
   bind_rows(.id = 'i')
 
-# cl <- makeCluster(1)
-# doSNOW::registerDoSNOW(cl)
-# on.exit(stopCluster(cl), add = T)
-
-# foreach_args <- c(
-#   as.list(sims),
-#   .errorhandling = 'pass',
-#   .packages = 'tidyverse'
-# )
-# 
-# MDEs <- do.call(foreach, foreach_args) %do% {
-#   sigfun <- sigfuns[[sigfun]]
-#   simMDE(nA, nB, nC, nD, N, sigfun)
-# }
-# 
-# sims$MDE <- MDEs
-
-
 
 # Scratch -----------------------------------------------------------------
 
 closeAllConnections()
-cl <- create_cluster(63) %>% 
-  # cluster_copy(fit_bayes) %>% 
-  cluster_copy(sigfuns) #%>% 
-  # cluster_copy(get_mde) %>% 
-  # cluster_copy(model)
+cl <- create_cluster() %>% 
+  cluster_copy(sigfuns)
 cluster_eval(cl, source(here::here('PowerCalc/loadproject.R')))
 set_default_cluster(cl)
 
@@ -71,7 +44,7 @@ sims1 <- sims %>%
   mutate(data = list(gen_study_data(coef[[1]], N[[1]]))) %>% 
   partition(i, nA, nB, nC, nD, N) %>% 
   mutate(fit = list(quietly(fit_bayes)(data[[1]], coef[[1]], model, chains = 1, iter = 1000,
-                              control = list(adapt_delta = 0.9, max_treedepth = 10))))
+                              control = list(adapt_delta = 0.9, max_treedepth = 25))))
 
 sims2 <- sims1 %>% 
   group_by(sigfun, add = TRUE) %>% 
