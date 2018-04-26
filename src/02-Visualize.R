@@ -12,7 +12,7 @@ ggplot(data = boxplot_data) +
   facet_wrap(~sigfun) + 
   geom_boxplot(aes(x = factor(N), fill = nArms, y = MDE))
 
-ggsave('out/boxplot.png')
+ggsave('graphs/boxplot.png')
 
 # Line plot median MDE ----------------------------------------------------
 
@@ -27,4 +27,4 @@ ggplot(data = lineplot_data, aes(x = N, y = MDE, color = nArms)) +
   geom_point() + 
   geom_line()
 
-ggsave('out/lineplot.png')
+ggsave('graphs/lineplot.png')

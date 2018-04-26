@@ -38,9 +38,6 @@ fit_bayes <- function(data, coef, model, ...) {
   return(fit)
 }
 
-model <- stan_model_cache('powerSim4var_update')
-
-
 # Frequentist fit functions -----------------------------------------------
 
 fit_freq_inter <- function(data, coef) {
