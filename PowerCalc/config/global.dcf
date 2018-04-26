@@ -1,0 +1,19 @@
+version: 0.1
+data_loading: FALSE
+data_loading_header: TRUE
+data_ignore:
+cache_loading: FALSE
+recursive_loading: FALSE
+munging: TRUE
+logging: FALSE
+logging_level: INFO
+load_libraries: FALSE
+libraries: magrittr,
+  tidyverse,
+  rstan,
+  doParallel
+as_factors: TRUE
+data_tables: FALSE
+attach_internal_libraries: FALSE
+cache_loaded_data:  FALSE
+sticky_variables: NONE
