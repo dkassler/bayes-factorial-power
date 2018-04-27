@@ -8,8 +8,8 @@ library(multidplyr)
 
 study_designs <- list(
   design_frame(2, 2, 2, 2), 
-  design_frame(3, 3, 5, 4),
-  design_frame(4, 3, 3, 2),
+  design_frame(3, 4, 3, 2),
+  design_frame(4, 3, 5, 3),
   design_frame(5, 5, 5, 2)
 )
 
@@ -30,9 +30,13 @@ fitfuns <- list(
 cfgs <- list(
   fit_sig_type(T, 'arms', 'bayes', 'bayes_arms'),
   fit_sig_type(T, 'main', 'bayes', 'bayes_main'),
-  fit_sig_type(F, 'arms', 'freq',  'freq_arms'),
-  fit_sig_type(F, 'main', 'freq',  'freq_main')
-)
+  fit_sig_type(F, 'arms', 'freq_inter', 'freq_arms'),
+  fit_sig_type(F, 'main', 'freq_main', 'freq_main')
+) %>% 
+  ensure(
+    all(map_lgl(., ~ .x[[1, 'fitfun']] %in% names(fitfuns))),
+    all(map_lgl(., ~ .x[[1, 'sigfun']] %in% names(sigfuns)))
+  )
 
 scenarios <- cross_df(list(
   study_design = study_designs,
@@ -44,12 +48,13 @@ scenarios <- cross_df(list(
 #' Run simulation to get MDE for each
 
 sims <- scenarios %>% 
-  replicate(n = 1000, expr = ., simplify = F) %>% 
+  replicate(n = 1, expr = ., simplify = F) %>% 
   bind_rows(.id = 'i')
 
 closeAllConnections()
-cl <- create_cluster() %>% 
-  cluster_copy(sigfuns)
+cl <- create_cluster(4) %>% 
+  cluster_copy(sigfuns) %>% 
+  cluster_copy(fitfuns)
 cluster_eval(cl, {
   library(ProjectTemplate)
   setwd(here::here())
@@ -63,6 +68,7 @@ sims1 <- sims %>%
   group_by(N, add = TRUE) %>% 
   mutate(data = list(gen_study_data(coef[[1]], N[[1]]))) %>% 
   partition(i, nA, nB, nC, nD, N) %>% 
+  group_by(fitfun, add = TRUE) %>% 
   mutate(fit = list(quietly(fitfuns[[fitfun[[1]]]])(data[[1]], coef[[1]])))
 
 sims2 <- sims1 %>% 
@@ -78,10 +84,10 @@ sims4 <- sims3 %>%
          PPs.warnings = map(PPs, 'warnings'),
          MDE.warnings = map(MDE, 'warnings')) %>% 
   mutate(MDE = map_dbl(MDE, 'result')) %>% 
-  mutate(hmc_diagnostics = 
+  mutate(avg_sampler_params = ifelse(bayes == FALSE, NA,
            map(fit, ~ get_sampler_params(.x[['result']], inc_warmup = F) %>% 
-                 do.call(rbind, .) %>% colMeans %>% as.data.frame.list)) %>% 
-  select(-fit, -PPs, -data) %>% 
+                 do.call(rbind, .) %>% colMeans %>% as.data.frame.list))) %>% 
+  select(-fit, -PPs, -data, -coef) %>% 
   ungroup
 
-saveRDS(sims4, 'save/mde_full.Rds')
+saveRDS(sims4, 'cache/mde_full.Rds')
