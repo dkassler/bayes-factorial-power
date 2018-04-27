@@ -11,7 +11,8 @@ load_libraries: TRUE
 libraries: magrittr,
   tidyverse,
   rstan,
-  doParallel
+  doParallel,
+  ensurer
 as_factors: TRUE
 data_tables: FALSE
 attach_internal_libraries: FALSE
