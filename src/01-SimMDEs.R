@@ -52,6 +52,8 @@ sims <- scenarios %>%
   bind_rows(.id = 'i')
 
 closeAllConnections()
+rm(list = 'cl')
+
 cl <- create_cluster() %>% 
   cluster_copy(sigfuns) %>% 
   cluster_copy(fitfuns)
