@@ -8,7 +8,7 @@ munging: TRUE
 logging: FALSE
 logging_level: INFO
 load_libraries: TRUE
-libraries: magrittr, tidyverse, rstan, doParallel, ensurer
+libraries: magrittr, tidyverse, rstan, doParallel, ensurer, glm2
 as_factors: TRUE
 data_tables: FALSE
 attach_internal_libraries: FALSE

@@ -21,7 +21,7 @@ sigfuns <- list(
 )
 
 fitfuns <- list(
-  'bayes' = partial(fit_bayes, model = model, chains = 1, iter = 1000,
+  'bayes' = partial(fit_bayes, model = model, chains = 3, iter = 1000,
                     control = list(adapt_delta = 0.9, max_treedepth = 25)),
   'freq_inter' = fit_freq_inter,
   'freq_main' = fit_freq_main
@@ -94,5 +94,5 @@ sims4 <- sims3 %>%
 
 # saveRDS(sims4, 'cache/mde_full.Rds')
 # saveRDS(sims3, file.path("C:", "Users", "dkassler", "Documents", "mde_full_wfits.Rds"))
-saveRDS(sims4, 'cache/mde_full.Rds')
-saveRDS(sims3, 'cache/sims_full.Rds')
+saveRDS(sims4, 'cache/mde_single.Rds')
+saveRDS(sims3, 'cache/sims_single.Rds')
