@@ -1,4 +1,4 @@
-version: 0.8
+version: 0.8.2
 data_loading: FALSE
 data_loading_header: TRUE
 data_ignore:
@@ -8,13 +8,9 @@ munging: TRUE
 logging: FALSE
 logging_level: INFO
 load_libraries: TRUE
-libraries: magrittr,
-  tidyverse,
-  rstan,
-  doParallel,
-  ensurer
+libraries: magrittr, tidyverse, rstan, doParallel, ensurer
 as_factors: TRUE
 data_tables: FALSE
 attach_internal_libraries: FALSE
-cache_loaded_data:  FALSE
+cache_loaded_data: FALSE
 sticky_variables: NONE

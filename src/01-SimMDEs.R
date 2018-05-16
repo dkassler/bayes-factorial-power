@@ -48,7 +48,7 @@ scenarios <- cross_df(list(
 #' Run simulation to get MDE for each
 
 sims <- scenarios %>% 
-  replicate(n = 1000, expr = ., simplify = F) %>% 
+  replicate(n = 1, expr = ., simplify = F) %>% 
   bind_rows(.id = 'i')
 
 closeAllConnections()
@@ -92,5 +92,7 @@ sims4 <- sims3 %>%
   select(-fit, -PPs, -data, -coef) %>% 
   ungroup
 
+# saveRDS(sims4, 'cache/mde_full.Rds')
+# saveRDS(sims3, file.path("C:", "Users", "dkassler", "Documents", "mde_full_wfits.Rds"))
 saveRDS(sims4, 'cache/mde_full.Rds')
-saveRDS(sims3, file.path("C:", "Users", "dkassler", "Documents", "mde_full_wfits.Rds"))
+saveRDS(sims3, 'cache/sims_full.Rds')
