@@ -30,11 +30,11 @@ lineplot <- function(.x) ggplot(data = .x,
                    shape = bayes))+
     guides(col=guide_legend(title=''), linetype = guide_legend(title = ''),
            shape = guide_legend(title = '')) +
-    labs(x='Sample size') +
+    labs(x='Sample size', y = 'Median MDE') +
     theme_bw() + 
-    scale_color_discrete(breaks = c('16 arms','72 arms','180 arms','250 arms'))+
-    scale_y_continuous(limits = c(0, .7), name = 'Median MDE') + 
-    scale_x_continuous(limits = c(0, 10000))
+    scale_color_discrete(breaks = c('16 arms','72 arms','180 arms','250 arms'))#+
+    #scale_y_continuous(limits = c(0, .7), name = 'Median MDE') + 
+    #scale_x_continuous(limits = c(0, 10000))
 
 for (.eft in c('main', 'arms')) {
 lineplot_data %>% 
