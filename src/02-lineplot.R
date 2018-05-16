@@ -45,7 +45,8 @@ lineplot_data %>%
 }
   
 lineplot_data %>% 
-  filter(efftype == 'arms', bayes == TRUE) %>% 
+  filter(efftype == 'arms', bayes == 'Bayesian') %>% 
   lineplot() +
+  guides(linetype = FALSE, shape = FALSE) +
   ggsave('graphs/lineplot_arms.png', 
          width = 6.5, height = 5)
